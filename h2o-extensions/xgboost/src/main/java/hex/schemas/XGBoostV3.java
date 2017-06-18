@@ -31,6 +31,7 @@ public class XGBoostV3 extends ModelBuilderSchema<XGBoost,XGBoostV3,XGBoostV3.XG
         "seed",
         "distribution",
         "tweedie_power",
+        "quiet_mode",
 
         // model specific
         "ntrees",
@@ -52,6 +53,13 @@ public class XGBoostV3 extends ModelBuilderSchema<XGBoost,XGBoostV3,XGBoostV3.XG
         "num_leaves",
         "min_sum_hessian_in_leaf",
         "min_data_in_leaf",
+
+        //dart
+        "sample_type",
+        "normalize_type",
+        "rate_drop",
+        "one_drop",
+        "skip_drop",
 
         //xgboost only
         "tree_method",
