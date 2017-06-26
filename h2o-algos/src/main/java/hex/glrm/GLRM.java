@@ -2551,7 +2551,7 @@ public class GLRM extends ModelBuilder<GLRMModel, GLRMModel.GLRMParameters, GLRM
 
     CholMulTask(CholeskyDecomposition chol, Archetypes yt, int ncolA, int ncolX, int ncats,
                 double[] normSub, double[] normMul) {
-      assert yt != null && yt.rank() == ncolX;
+      assert yt != null && yt.rank() <= ncolX;
       assert ncats <= ncolA;
       _yt = yt;
       _ncolA = ncolA;
