@@ -3228,11 +3228,12 @@ as.h2o.Matrix <- function(x, destination_frame="", ...) {
   .key.validate(destination_frame)
   if ( destination_frame=="" ) # .h2o.readSVMLight wont handle ""
     destination_frame <- .key.make("Matrix") # only used if `x` variable name not valid key
-  
-  tmpf <- tempfile(fileext = ".svm")
-  .h2o.write.matrix.svmlight(x, file = tmpf)
-  h2f <- .h2o.readSVMLight(tmpf, destination_frame = destination_frame)
-  file.remove(tmpf)
+
+  drs = as.simple_triplet_matrix(x) # need to convert x to a simple triplet matrix format
+  thefile <- tempfile()
+  .h2o.write_stm_svm(drs, file = thefile)
+  h2f <- h2o.uploadFile(thefile, parse_type = "SVMLight")
+  unlink(thefile)
   h2f
 }
 
@@ -3250,13 +3251,47 @@ as.h2o.Matrix <- function(x, destination_frame="", ...) {
   })
 }
 
+
 #'
 #' Converts parsed H2O data into an R data frame
 #'
 #' Downloads the H2O data and then scans it in to an R data frame.
 #'
 #' @param x An H2OFrame object.
-#' @param ... Further arguments to be passed down from other methods.
+#' @
+# Convert a simple triplet matrix to svm format
+#' @author Peter Ellis
+#' @return a character vector of length n = nrow(stm)
+.h2o.calc_stm_svm <- function(stm, y){
+  # returns a character vector of length y ready for writing in svm format
+  if(!"simple_triplet_matrix" %in% class(stm)){
+    stop("stm must be a simple triple matrix")
+  }
+  if(!is.vector(y) | nrow(stm) != length(y)){
+    stop("y should be a vector of length equal to number of rows of stm")
+  }
+  n <- length(y)
+
+  # data.table solution thanks to @roland at http://stackoverflow.com/questions/41477700/optimising-sapply-or-for-paste-to-efficiently-transform-sparse-triplet-m/41478999#41478999
+  stm2 <- data.table(i = stm$i, j = stm$j, v = stm$v)
+  res <- stm2[, .(i, jv = paste(j, v, sep = ":"))][order(i), .(res = paste(jv, collapse = " ")), by = i][["res"]]
+
+  out <- paste(y, res)
+
+  return(out)
+}
+
+
+#' @param stm a simple triplet matrix (class exported slam) of features (ie explanatory variables)
+#' @param y a vector of labels.  If not provided, a dummy of 1s is provided
+#' @param file file to write to.
+#' @author Peter Ellis
+.h2o.write_stm_svm <- function(stm, y = rep(1, nrow(stm)), file){
+  out <- .h2o.calc_stm_svm(stm, y)
+  writeLines(out, con = file)
+}
+
+# param ... Further arguments to be passed down from other methods.
 #' @details
 #' Method \code{as.data.frame.H2OFrame} will use \code{\link[data.table]{fread}} if data.table package is installed in required version.
 #' @seealso \code{\link{use.package}}
