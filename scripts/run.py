@@ -327,9 +327,9 @@ class H2OCloudNode(object):
 
         cmd = [java,
                # "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
-               "-jar", self.h2o_jar,
                "-Xmx" + self.xmx,
                "-ea",
+               "-jar", self.h2o_jar,
                "-name", self.cloud_name,
                "-baseport", str(self.my_base_port),
                "-ga_opt_out"]
