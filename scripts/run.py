@@ -320,26 +320,22 @@ class H2OCloudNode(object):
         # to match the cdh3 cluster we're hard-wiring tests to
         # i.e. it won't make s3n/s3 break on ec2
 
-        if self.is_client:
-            main_class = "water.H2OClientApp"
-        else:
-            main_class = "water.H2OApp"
-
         if "JAVA_HOME" in os.environ:
             java = os.environ["JAVA_HOME"] + "/bin/java"
         else:
             java = "java"
-        classpath_sep = ";" if sys.platform == "win32" else ":"
-        classpath = self.h2o_jar if self.cp == "" else self.h2o_jar + classpath_sep + self.cp
+
         cmd = [java,
                # "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
+               "-jar", self.h2o_jar,
                "-Xmx" + self.xmx,
                "-ea",
-               "-cp", classpath,
-               main_class,
                "-name", self.cloud_name,
                "-baseport", str(self.my_base_port),
                "-ga_opt_out"]
+
+        if self.is_client:
+            cmd += ["-client"]
 
         # If the jacoco flag was included, then modify cmd to generate coverage
         # data using the jacoco agent
