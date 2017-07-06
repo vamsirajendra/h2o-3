@@ -16,9 +16,9 @@ test.pubdev_4630 = function(){
     # what is R doing
     #=============import to R================
     # Adapting the example at http://tidytextmining.com/usenet.html
- #   browser()
+    browser()
     a = locate("bigdata/laptop/enron_mess")
-    folders <- paste0(a, "/enron", 1:6)  # find path to directories containing enron emails
+    folders <- paste0(a, "/enron", 1:3)  # find path to directories containing enron emails, 6
 
     spam <- data_frame(file = dir(paste0(folders, "/spam"), full.names = TRUE)) %>%
         mutate(text = map(file, readLines, encoding = "Latin-1")) %>%
